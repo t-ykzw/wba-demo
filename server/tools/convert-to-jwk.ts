@@ -8,7 +8,9 @@ async function main() {
   const outIndex = argv.indexOf('--output');
 
   if (algIndex === -1 || pubIndex === -1 || outIndex === -1) {
-    console.error('Usage: --algorithm Ed25519 --public-key <path> --output <path>');
+    console.error(
+      'Usage: --algorithm Ed25519 --public-key <path> --output <path>'
+    );
     process.exit(1);
   }
 
@@ -26,4 +28,6 @@ async function main() {
   console.log(`✅ Wrote JWK to ${outputPath}`);
 }
 
-(async () => { await main(); })();
+(async () => {
+  await main();
+})();

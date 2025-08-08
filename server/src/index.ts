@@ -6,14 +6,35 @@ import { AuthVerifier, RequestLike } from './auth-verifier';
 // 構造化ログ用のlogger
 const log = {
   info: (message: string, data?: any) => {
-    console.log(JSON.stringify({ level: 'info', message, timestamp: new Date().toISOString(), ...data }));
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        message,
+        timestamp: new Date().toISOString(),
+        ...data,
+      })
+    );
   },
   error: (message: string, error?: any) => {
-    console.log(JSON.stringify({ level: 'error', message, timestamp: new Date().toISOString(), error: error?.message || error }));
+    console.log(
+      JSON.stringify({
+        level: 'error',
+        message,
+        timestamp: new Date().toISOString(),
+        error: error?.message || error,
+      })
+    );
   },
   warn: (message: string, data?: any) => {
-    console.log(JSON.stringify({ level: 'warn', message, timestamp: new Date().toISOString(), ...data }));
-  }
+    console.log(
+      JSON.stringify({
+        level: 'warn',
+        message,
+        timestamp: new Date().toISOString(),
+        ...data,
+      })
+    );
+  },
 };
 
 const app = new Hono();
@@ -29,25 +50,33 @@ app.use('*', async (c, next) => {
     const request: RequestLike = {
       method: c.req.method,
       url: c.req.url,
-      headers: Object.fromEntries(c.req.raw.headers.entries())
+      headers: Object.fromEntries(c.req.raw.headers.entries()),
     };
 
     const verificationResult = await authVerifier.verifyRequest(request);
-    
+
     if (!verificationResult.isValid) {
       log.error('署名検証失敗', { error: verificationResult.error });
-      return c.json({ 
-        error: 'Signature verification failed', 
-        details: verificationResult.error 
-      }, 401);
+      return c.json(
+        {
+          error: 'Signature verification failed',
+          details: verificationResult.error,
+        },
+        401
+      );
     }
 
-    log.info('署名検証成功', { keyId: verificationResult.keyId, algorithm: verificationResult.algorithm });
-    
+    log.info('署名検証成功', {
+      keyId: verificationResult.keyId,
+      algorithm: verificationResult.algorithm,
+    });
+
     // 検証結果をヘッダーに保存（ログ用）
     c.header('X-Verification-KeyId', verificationResult.keyId || 'unknown');
-    c.header('X-Verification-Algorithm', verificationResult.algorithm || 'unknown');
-    
+    c.header(
+      'X-Verification-Algorithm',
+      verificationResult.algorithm || 'unknown'
+    );
   } catch (error) {
     log.error('署名検証エラー', error);
     return c.json({ error: 'Signature verification error' }, 500);
@@ -57,28 +86,29 @@ app.use('*', async (c, next) => {
 });
 
 // ルートページ - 各種パターンへのリンク一覧
-app.get('/', (c) => {
+app.get('/', c => {
   const patterns = [
     {
       name: '支払い不要ページ',
       url: '/no-payment-required',
-      description: '支払い要求のヘッダを返さないページ'
+      description: '支払い要求のヘッダを返さないページ',
     },
     {
       name: '支払い要求ページ',
       url: '/payment-required',
-      description: '支払い要求のフローを始めるページ'
+      description: '支払い要求のフローを始めるページ',
     },
     {
       name: '低価格支払いページ',
       url: '/payment-required/low-price',
-      description: '支払い要求が来てるが、はじめから払える金額が要求されるページ'
+      description:
+        '支払い要求が来てるが、はじめから払える金額が要求されるページ',
     },
     {
       name: '高価格支払いページ',
       url: '/payment-required/too-expensive',
-      description: '支払い要求が来てるが、払えないので決裂するページ'
-    }
+      description: '支払い要求が来てるが、払えないので決裂するページ',
+    },
   ];
 
   const html = `
@@ -92,13 +122,17 @@ app.get('/', (c) => {
       <h1>Web Bot Auth Demo - コンテンツサーバー</h1>
       <p>以下のパターンをテストできます：</p>
       <ul>
-        ${patterns.map(pattern => `
+        ${patterns
+          .map(
+            pattern => `
           <li>
             <a href="${pattern.url}">${pattern.name}</a>
             <br>
             <small>${pattern.description}</small>
           </li>
-        `).join('')}
+        `
+          )
+          .join('')}
       </ul>
     </body>
     </html>
@@ -108,7 +142,7 @@ app.get('/', (c) => {
 });
 
 // 支払い不要ページ
-app.get('/no-payment-required', (c) => {
+app.get('/no-payment-required', c => {
   return c.html(`
     <!DOCTYPE html>
     <html>
@@ -127,7 +161,7 @@ app.get('/no-payment-required', (c) => {
 });
 
 // 支払い要求ページ
-app.get('/payment-required', (c) => {
+app.get('/payment-required', c => {
   // 支払い要求のヘッダを設定
   c.header('Payment-Required', 'true');
   c.header('Payment-Required-Amount', '100');
@@ -153,7 +187,7 @@ app.get('/payment-required', (c) => {
 });
 
 // 低価格支払いページ
-app.get('/payment-required/low-price', (c) => {
+app.get('/payment-required/low-price', c => {
   // 低価格の支払い要求
   c.header('Payment-Required', 'true');
   c.header('Payment-Required-Amount', '10');
@@ -179,7 +213,7 @@ app.get('/payment-required/low-price', (c) => {
 });
 
 // 高価格支払いページ
-app.get('/payment-required/too-expensive', (c) => {
+app.get('/payment-required/too-expensive', c => {
   // 高価格の支払い要求
   c.header('Payment-Required', 'true');
   c.header('Payment-Required-Amount', '1000');
@@ -205,7 +239,7 @@ app.get('/payment-required/too-expensive', (c) => {
 });
 
 // 支払い処理エンドポイント
-app.post('/payment-process', async (c) => {
+app.post('/payment-process', async c => {
   try {
     const body = await c.req.json();
     const { amount, currency, description, crawlerId } = body;
@@ -219,7 +253,7 @@ app.post('/payment-process', async (c) => {
       amount,
       currency,
       description,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     log.info('支払い成功', { transactionId: paymentResult.transactionId });
@@ -227,15 +261,17 @@ app.post('/payment-process', async (c) => {
     return c.json({
       success: true,
       message: 'Payment processed successfully',
-      data: paymentResult
+      data: paymentResult,
     });
-
   } catch (error) {
     log.error('支払い処理エラー', error);
-    return c.json({
-      success: false,
-      error: 'Payment processing failed'
-    }, 500);
+    return c.json(
+      {
+        success: false,
+        error: 'Payment processing failed',
+      },
+      500
+    );
   }
 });
 

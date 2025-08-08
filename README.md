@@ -30,12 +30,7 @@ npx tsx ./server/tools/convert-to-jwk.ts \
 ### 2. 依存関係のインストール
 
 ```bash
-# サーバー側
-cd server
-npm install
-
-# クローラ側
-cd ../crawler
+# 依存関係をインストール
 npm install
 ```
 
@@ -48,9 +43,22 @@ docker-compose up --build
 
 ## 使用方法
 
+### 開発モードでの起動
+
+```bash
+# サーバー側（開発モード）
+npm run dev:server
+
+# 身元照会サーバー（開発モード）
+npm run dev:id-server
+
+# クローラ（開発モード）
+npm run dev:crawler
+```
+
 ### コンテンツサーバー
 
-- **URL**: <http://localhost:8429>
+- **URL**: `http://localhost:8429`
 - **機能**: 各種支払いパターンのテストページを提供
 
 #### 利用可能なパターン
@@ -69,7 +77,7 @@ docker-compose up --build
 
 ### クローラ身元照会サーバー
 
-- **URL**: <http://localhost:8430>
+- **URL**: `http://localhost:8430`
 - **機能**: クローラの身元情報（JWK、公開鍵）を提供
 
 #### エンドポイント
@@ -78,17 +86,9 @@ docker-compose up --build
 - `/.well-known/public.key`: 公開鍵
 - `/health`: ヘルスチェック
 
-### クローラの実行
-
-```bash
-# 開発モードでクローラを実行
-cd crawler
-npm run dev:crawler
-```
-
 ## アーキテクチャ
 
-```
+```plain
 wba-demo/
 ├── server/                    # コンテンツサーバー
 │   ├── src/index.ts          # メインサーバー
@@ -115,29 +115,32 @@ wba-demo/
 
 ## 開発
 
-### ローカル開発
+### コード整形
 
 ```bash
-# サーバー側（開発モード）
-cd server
-npm run dev
+# コードを整形
+npm run format
 
-# クローラ側（開発モード）
-cd crawler
-npm run dev:crawler
-npm run dev:id-server
+# 整形チェック
+npm run format:check
+```
+
+### ビルド
+
+```bash
+# すべてをビルド
+npm run build
 ```
 
 ### テスト
 
 ```bash
-# サーバー側
-cd server
+# すべてのテスト
 npm test
 
-# クローラ側
-cd crawler
-npm test
+# 個別テスト
+npm run test:server
+npm run test:crawler
 ```
 
 ## 注意事項

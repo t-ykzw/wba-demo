@@ -1,0 +1,32 @@
+{
+  "name": "wba-demo",
+  "version": "1.0.0",
+  "description": "Web Bot Auth Demo - Cloudflare Pay Per Crawl local verification",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build": "tsc",
+    "dev:server": "tsx watch server/src/index.ts",
+    "dev:crawler": "tsx watch crawler/crawler/index.ts",
+    "dev:id-server": "tsx watch crawler/id-server/index.ts",
+    "start:server": "node dist/server/src/index.js",
+    "start:crawler": "node dist/crawler/crawler/index.js",
+    "start:id-server": "node dist/crawler/id-server/index.js",
+    "test": "vitest",
+    "test:server": "vitest server",
+    "test:crawler": "vitest crawler"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.18.1",
+    "hono": "^4.0.0",
+    "jose": "^5.0.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

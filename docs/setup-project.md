@@ -1,4 +1,3 @@
-
 # Web Bot Auth ローカル環境構築
 
 この文書は、Cloudflare の pay per crawl を完全ローカル環境で動作検証をするための作るための設計書です
@@ -167,7 +166,7 @@ README.md を更新して，使い方その他を書く
 ## 補足
 
 - 検証ロジックは [web-bot-auth GitHub](https://github.com/cloudflare/web-bot-auth) を参照
-  - 内部でパッケージとして `http-message-sig` を使うことになっているが npm として公開されてないので，  web-bot-auth を `external/web-bot-auth` ディレクトリに clone しておいて， `packages/http-message-sig` を活用する
+  - 内部でパッケージとして `http-message-sig` を使うことになっているが npm として公開されてないので， web-bot-auth を `external/web-bot-auth` ディレクトリに clone しておいて， `packages/http-message-sig` を活用する
 - 秘密鍵: PEM 形式（Ed25519）
 - 公開鍵: JWK（.well-known で提供）
 

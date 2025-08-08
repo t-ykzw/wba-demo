@@ -5,8 +5,15 @@ import { importSPKI, jwtVerify } from 'jose';
 // 構造化ログ用のlogger
 const log = {
   error: (message: string, error?: any) => {
-    console.log(JSON.stringify({ level: 'error', message, timestamp: new Date().toISOString(), error: error?.message || error }));
-  }
+    console.log(
+      JSON.stringify({
+        level: 'error',
+        message,
+        timestamp: new Date().toISOString(),
+        error: error?.message || error,
+      })
+    );
+  },
 };
 
 export interface RequestLike {
@@ -28,10 +35,13 @@ export class AuthVerifier {
 
   constructor() {
     try {
-      const publicKeyPath = join(process.cwd(), '../shared/keys/public.key');
+      const publicKeyPath = join(process.cwd(), 'shared/keys/public.key');
       this.publicKey = readFileSync(publicKeyPath, 'utf8');
-      
-      const jwkPath = join(process.cwd(), '../shared/keys/http-message-signatures-directory.json');
+
+      const jwkPath = join(
+        process.cwd(),
+        'shared/keys/http-message-signatures-directory.json'
+      );
       const jwkText = readFileSync(jwkPath, 'utf8');
       this.jwkData = JSON.parse(jwkText);
     } catch (error) {
@@ -40,7 +50,10 @@ export class AuthVerifier {
     }
   }
 
-  private extractHeader(headers: Record<string, string>, name: string): string | null {
+  private extractHeader(
+    headers: Record<string, string>,
+    name: string
+  ): string | null {
     const lowerName = name.toLowerCase();
     for (const [key, value] of Object.entries(headers)) {
       if (key.toLowerCase() === lowerName) {
@@ -90,7 +103,11 @@ export class AuthVerifier {
     return match[1];
   }
 
-  private buildSignedData(request: RequestLike, components: string[], signatureInputString: string): string {
+  private buildSignedData(
+    request: RequestLike,
+    components: string[],
+    signatureInputString: string
+  ): string {
     const parts: string[] = [];
 
     for (const component of components) {
@@ -106,7 +123,7 @@ export class AuthVerifier {
         case '@authority': {
           const url = new URL(request.url);
           const port = url.port ? parseInt(url.port, 10) : null;
-          value = `${url.hostname}${port && ![80, 443].includes(port) ? `:${port}` : ""}`;
+          value = `${url.hostname}${port && ![80, 443].includes(port) ? `:${port}` : ''}`;
           break;
         }
         case '@scheme':
@@ -135,7 +152,10 @@ export class AuthVerifier {
   async verifyRequest(request: RequestLike): Promise<VerificationResult> {
     try {
       // Signature-Inputヘッダーを取得
-      const signatureInput = this.extractHeader(request.headers, 'signature-input');
+      const signatureInput = this.extractHeader(
+        request.headers,
+        'signature-input'
+      );
       if (!signatureInput) {
         return { isValid: false, error: 'Signature-Input header not found' };
       }
@@ -147,8 +167,9 @@ export class AuthVerifier {
       }
 
       // Signature-Inputを解析
-      const { key, components, parameters } = this.parseSignatureInput(signatureInput);
-      
+      const { key, components, parameters } =
+        this.parseSignatureInput(signatureInput);
+
       // 署名を解析
       const signatureValue = this.parseSignature(signature);
 
@@ -162,7 +183,11 @@ export class AuthVerifier {
       }
 
       // 署名データを構築
-      const signedData = this.buildSignedData(request, components, signatureInput);
+      const signedData = this.buildSignedData(
+        request,
+        components,
+        signatureInput
+      );
 
       // 公開鍵で署名を検証
       const keyLike = await importSPKI(this.publicKey, 'Ed25519');
@@ -175,19 +200,18 @@ export class AuthVerifier {
         return {
           isValid: true,
           keyId: parameters.keyid,
-          algorithm: 'Ed25519'
+          algorithm: 'Ed25519',
         };
       } catch (verifyError) {
         return {
           isValid: false,
-          error: `Signature verification failed: ${verifyError}`
+          error: `Signature verification failed: ${verifyError}`,
         };
       }
-
     } catch (error) {
       return {
         isValid: false,
-        error: `Verification error: ${error}`
+        error: `Verification error: ${error}`,
       };
     }
   }

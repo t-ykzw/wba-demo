@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+
+# Keys and sensitive data
+shared/keys/*
+!shared/keys/.keep
+
+# Generated files
+*.min.js
+*.min.css
+
+# Logs
+*.log

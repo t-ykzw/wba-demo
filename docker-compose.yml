@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   # コンテンツサーバー
@@ -7,7 +7,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "8429:8429"
+      - '8429:8429'
     volumes:
       - ./shared/keys:/app/shared/keys:ro
     environment:
@@ -21,7 +21,7 @@ services:
       context: ./crawler
       dockerfile: Dockerfile
     ports:
-      - "8430:8430"
+      - '8430:8430'
     volumes:
       - ./shared/keys:/app/shared/keys:ro
     environment:
