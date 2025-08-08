@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  # コンテンツサーバー
+  content-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8429:8429"
+    volumes:
+      - ./shared/keys:/app/shared/keys:ro
+    environment:
+      - NODE_ENV=production
+    networks:
+      - wba-network
+
+  # クローラ身元照会サーバー
+  crawler-id-server:
+    build:
+      context: ./crawler
+      dockerfile: Dockerfile
+    ports:
+      - "8430:8430"
+    volumes:
+      - ./shared/keys:/app/shared/keys:ro
+    environment:
+      - NODE_ENV=production
+    networks:
+      - wba-network
+
+networks:
+  wba-network:
+    driver: bridge

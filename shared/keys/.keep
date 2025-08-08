@@ -1,0 +1,2 @@
+# This file ensures the shared/keys directory is tracked by git
+# while the actual key files are ignored
