@@ -13,8 +13,9 @@
     "start:crawler": "node dist/crawler/crawler/index.js",
     "start:id-server": "node dist/crawler/id-server/index.js",
     "test": "vitest",
-    "test:server": "vitest server",
-    "test:crawler": "vitest crawler"
+    "test:crawler": "vitest test/crawler",
+    "test:server": "vitest test/server",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@hono/node-server": "^1.18.1",
@@ -27,6 +28,6 @@
     "prettier": "^3.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^3.2.4"
   }
 }

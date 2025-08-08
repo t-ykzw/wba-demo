@@ -28,9 +28,9 @@ Thumbs.db
 # Keys and sensitive data
 shared/keys/*
 !shared/keys/.keep
+test/keys/*
 
 # Logs
-logs
 *.log
 
 # Runtime data
