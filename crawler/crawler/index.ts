@@ -56,12 +56,17 @@ class Crawler {
   private serverUrl: string;
 
   constructor() {
-    this.privateKey = readFileSync(
-      join(process.cwd(), 'shared/keys/private.key'),
-      'utf8'
-    );
+    // 環境変数から鍵ファイルパスを取得、デフォルトはプロジェクトルート
+    const keysDir = process.env.KEYS_DIR || join(process.cwd(), 'shared/keys');
+    this.privateKey = readFileSync(join(keysDir, 'private.key'), 'utf8');
     this.keyId = 'my-key-id';
     this.serverUrl = 'http://localhost:8429';
+
+    log.info('クローラ初期化完了', {
+      keysDir,
+      keyId: this.keyId,
+      serverUrl: this.serverUrl,
+    });
   }
 
   private async createSignature(

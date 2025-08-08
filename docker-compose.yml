@@ -12,6 +12,7 @@ services:
       - ./shared/keys:/app/shared/keys:ro
     environment:
       - NODE_ENV=production
+      - KEYS_DIR=/app/shared/keys
     networks:
       - wba-network
 
@@ -26,6 +27,7 @@ services:
       - ./shared/keys:/app/shared/keys:ro
     environment:
       - NODE_ENV=production
+      - KEYS_DIR=/app/shared/keys
     networks:
       - wba-network
 

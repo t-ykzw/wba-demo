@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
+import { serve } from '@hono/node-server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -37,10 +38,9 @@ app.use('*', cors());
 // JWKディレクトリを提供
 app.get('/.well-known/http-message-signatures-directory.json', c => {
   try {
-    const jwkPath = join(
-      process.cwd(),
-      'shared/keys/http-message-signatures-directory.json'
-    );
+    // 環境変数から鍵ファイルパスを取得、デフォルトはプロジェクトルート
+    const keysDir = process.env.KEYS_DIR || join(process.cwd(), 'shared/keys');
+    const jwkPath = join(keysDir, 'http-message-signatures-directory.json');
     const jwkData = readFileSync(jwkPath, 'utf8');
     c.header('Content-Type', 'application/json');
     return c.body(jwkData);
@@ -53,7 +53,9 @@ app.get('/.well-known/http-message-signatures-directory.json', c => {
 // 公開鍵を提供
 app.get('/.well-known/public.key', c => {
   try {
-    const publicKeyPath = join(process.cwd(), 'shared/keys/public.key');
+    // 環境変数から鍵ファイルパスを取得、デフォルトはプロジェクトルート
+    const keysDir = process.env.KEYS_DIR || join(process.cwd(), 'shared/keys');
+    const publicKeyPath = join(keysDir, 'public.key');
     const publicKey = readFileSync(publicKeyPath, 'utf8');
     c.header('Content-Type', 'application/x-pem-file');
     return c.body(publicKey);
@@ -67,10 +69,6 @@ app.get('/.well-known/public.key', c => {
 app.get('/health', c => {
   return c.json({ status: 'ok', service: 'crawler-id-server' });
 });
-
-export default app;
-
-import { serve } from '@hono/node-server';
 
 // サーバー起動設定
 const port = process.env.PORT || 8430;

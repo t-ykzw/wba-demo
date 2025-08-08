@@ -4,6 +4,16 @@ import { importSPKI, jwtVerify } from 'jose';
 
 // 構造化ログ用のlogger
 const log = {
+  info: (message: string, data?: any) => {
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        message,
+        timestamp: new Date().toISOString(),
+        ...data,
+      })
+    );
+  },
   error: (message: string, error?: any) => {
     console.log(
       JSON.stringify({
@@ -35,15 +45,18 @@ export class AuthVerifier {
 
   constructor() {
     try {
-      const publicKeyPath = join(process.cwd(), 'shared/keys/public.key');
+      // 環境変数から鍵ファイルパスを取得、デフォルトはプロジェクトルート
+      const keysDir =
+        process.env.KEYS_DIR || join(process.cwd(), 'shared/keys');
+
+      const publicKeyPath = join(keysDir, 'public.key');
       this.publicKey = readFileSync(publicKeyPath, 'utf8');
 
-      const jwkPath = join(
-        process.cwd(),
-        'shared/keys/http-message-signatures-directory.json'
-      );
+      const jwkPath = join(keysDir, 'http-message-signatures-directory.json');
       const jwkText = readFileSync(jwkPath, 'utf8');
       this.jwkData = JSON.parse(jwkText);
+
+      log.info('鍵ファイル読み込み成功', { keysDir, publicKeyPath, jwkPath });
     } catch (error) {
       log.error('鍵ファイルの読み込みエラー', error);
       throw new Error('鍵ファイルの読み込みに失敗しました');

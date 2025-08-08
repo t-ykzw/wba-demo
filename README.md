@@ -34,7 +34,21 @@ npx tsx ./server/tools/convert-to-jwk.ts \
 npm install
 ```
 
-### 3. Docker Composeで起動
+### 3. 環境変数の設定（オプション）
+
+鍵ファイルのパスをカスタマイズする場合：
+
+```bash
+# 環境変数で鍵ファイルディレクトリを指定
+export KEYS_DIR=/path/to/your/keys
+
+# または、実行時に指定
+KEYS_DIR=/path/to/your/keys npm run dev:server
+```
+
+デフォルトでは `./shared/keys` が使用されます。
+
+### 4. Docker Composeで起動
 
 ```bash
 # コンテナをビルドして起動
