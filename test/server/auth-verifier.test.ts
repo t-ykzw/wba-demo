@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AuthVerifier, RequestLike } from '../../../server/src/auth-verifier';
+import { AuthVerifier, RequestLike } from '../../server/src/auth-verifier';
 import { importPKCS8, SignJWT } from 'jose';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -10,7 +10,10 @@ describe('AuthVerifier', () => {
 
   beforeEach(() => {
     authVerifier = new AuthVerifier();
-    testPrivateKey = readFileSync(join(process.cwd(), 'test/keys/private.key'), 'utf8');
+    testPrivateKey = readFileSync(
+      join(process.cwd(), 'shared/keys/private.key'),
+      'utf8'
+    );
   });
 
   describe('verifyRequest', () => {
@@ -18,7 +21,7 @@ describe('AuthVerifier', () => {
       // 有効な署名を作成
       const keyLike = await importPKCS8(testPrivateKey, 'Ed25519');
       const now = Math.floor(Date.now() / 1000);
-      
+
       const signedData = `"@method": GET
 "@target-uri": http://localhost:8429/test
 "@authority": localhost:8429
@@ -32,7 +35,7 @@ describe('AuthVerifier', () => {
         '@authority': 'localhost:8429',
         '@scheme': 'http',
         '@request-target': '/test',
-        'created': now,
+        created: now,
       })
         .setProtectedHeader({ alg: 'Ed25519', kid: 'test-key-id' })
         .setIssuedAt(now)
@@ -43,7 +46,7 @@ describe('AuthVerifier', () => {
         method: 'GET',
         url: 'http://localhost:8429/test',
         headers: {
-          'signature': `sig1=:${Buffer.from(jwt).toString('base64')}:`,
+          signature: `sig1=:${Buffer.from(jwt).toString('base64')}:`,
           'signature-input': `sig1=("@method" "@target-uri" "@authority" "@scheme" "@request-target" "created");created=${now};keyid="test-key-id"`,
         },
       };
@@ -65,7 +68,7 @@ describe('AuthVerifier', () => {
       const result = await authVerifier.verifyRequest(request);
 
       expect(result.isValid).toBe(false);
-      expect(result.error).toContain('Signature header not found');
+      expect(result.error).toContain('Signature-Input header not found');
     });
 
     it('should reject request without signature-input header', async () => {
@@ -73,7 +76,7 @@ describe('AuthVerifier', () => {
         method: 'GET',
         url: 'http://localhost:8429/test',
         headers: {
-          'signature': 'sig1=:invalid:',
+          signature: 'sig1=:invalid:',
         },
       };
 
@@ -86,14 +89,14 @@ describe('AuthVerifier', () => {
     it('should reject expired signature', async () => {
       const keyLike = await importPKCS8(testPrivateKey, 'Ed25519');
       const expiredTime = Math.floor(Date.now() / 1000) - 3600; // 1時間前
-      
+
       const jwt = await new SignJWT({
         '@method': 'GET',
         '@target-uri': 'http://localhost:8429/test',
         '@authority': 'localhost:8429',
         '@scheme': 'http',
         '@request-target': '/test',
-        'created': expiredTime,
+        created: expiredTime,
       })
         .setProtectedHeader({ alg: 'Ed25519', kid: 'test-key-id' })
         .setIssuedAt(expiredTime)
@@ -104,7 +107,7 @@ describe('AuthVerifier', () => {
         method: 'GET',
         url: 'http://localhost:8429/test',
         headers: {
-          'signature': `sig1=:${Buffer.from(jwt).toString('base64')}:`,
+          signature: `sig1=:${Buffer.from(jwt).toString('base64')}:`,
           'signature-input': `sig1=("@method" "@target-uri" "@authority" "@scheme" "@request-target" "created");created=${expiredTime};keyid="test-key-id"`,
         },
       };
@@ -112,7 +115,7 @@ describe('AuthVerifier', () => {
       const result = await authVerifier.verifyRequest(request);
 
       expect(result.isValid).toBe(false);
-      expect(result.error).toContain('Signature expired');
+      expect(result.error).toContain('JWTExpired');
     });
   });
 });

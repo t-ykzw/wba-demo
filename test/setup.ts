@@ -1,45 +1,31 @@
 import { beforeAll, afterAll } from 'vitest';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-// テスト用の鍵ファイルを作成
+// テスト用の鍵ファイルの存在確認
 beforeAll(() => {
-  const testKeysDir = join(process.cwd(), 'test/keys');
-  
-  // テスト用の鍵ファイルが存在しない場合は作成
-  try {
-    readFileSync(join(testKeysDir, 'private.key'));
-  } catch {
-    // テスト用の鍵ファイルを作成
-    const privateKey = `-----BEGIN PRIVATE KEY-----
-MC4CAQAwBQYDK2VwBCIEIJ+DYvh6SE4VJbIqRbsE5YyAuBUj8M4Sxzi3yjXZxN0T
------END PRIVATE KEY-----`;
-    
-    const publicKey = `-----BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAH4Ni+HpIThUlsipFuwTljIC4FSPwzhLHOLfKNdnE3RM=
------END PUBLIC KEY-----`;
-    
-    const jwkData = {
-      keys: [
-        {
-          kty: 'OKP',
-          crv: 'Ed25519',
-          kid: 'test-key-id',
-          x: 'H4Ni-HpIThUlsipFuwTljIC4FSPwzhLHOLfKNdnE3RM',
-        },
-      ],
-    };
-    
-    writeFileSync(join(testKeysDir, 'private.key'), privateKey);
-    writeFileSync(join(testKeysDir, 'public.key'), publicKey);
-    writeFileSync(
-      join(testKeysDir, 'http-message-signatures-directory.json'),
-      JSON.stringify(jwkData, null, 2)
+  const keysDir = process.env.KEYS_DIR || join(process.cwd(), 'shared/keys');
+
+  // 必要な鍵ファイルが存在するかチェック
+  const requiredFiles = [
+    'private.key',
+    'public.key',
+    'http-message-signatures-directory.json',
+  ];
+
+  const missingFiles = requiredFiles.filter(
+    file => !existsSync(join(keysDir, file))
+  );
+
+  if (missingFiles.length > 0) {
+    throw new Error(
+      `必要な鍵ファイルが見つかりません: ${missingFiles.join(', ')}\n` +
+        `READMEの「1. 鍵ペアの作成」セクションを参照して鍵ペアを生成してください。`
     );
   }
-  
+
   // テスト用の環境変数を設定
-  process.env.KEYS_DIR = testKeysDir;
+  process.env.KEYS_DIR = keysDir;
 });
 
 // テスト後のクリーンアップ
